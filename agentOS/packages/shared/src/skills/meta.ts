@@ -1,0 +1,68 @@
+import type { SkillCategoryMeta } from "./types";
+
+export const SKILL_CATEGORIES_META: SkillCategoryMeta[] = [
+  {
+    slug: "engineering",
+    name: "Engineering",
+    description: "Build and scale product technology.",
+    icon: "Code2",
+    color: "#3B82F6",
+    sortOrder: 0,
+  },
+  {
+    slug: "product",
+    name: "Product",
+    description: "Define what to build and why.",
+    icon: "Layers",
+    color: "#8B5CF6",
+    sortOrder: 1,
+  },
+  {
+    slug: "sales",
+    name: "Sales",
+    description: "Revenue, pipeline, and customer relationships.",
+    icon: "TrendingUp",
+    color: "#10B981",
+    sortOrder: 2,
+  },
+  {
+    slug: "marketing",
+    name: "Marketing",
+    description: "Brand, demand, and growth.",
+    icon: "Megaphone",
+    color: "#EC4899",
+    sortOrder: 3,
+  },
+  {
+    slug: "hr",
+    name: "HR",
+    description: "People operations and talent.",
+    icon: "Users",
+    color: "#F97316",
+    sortOrder: 4,
+  },
+  {
+    slug: "finance",
+    name: "Finance",
+    description: "Planning, reporting, and fiscal health.",
+    icon: "DollarSign",
+    color: "#14B8A6",
+    sortOrder: 5,
+  },
+  {
+    slug: "legal",
+    name: "Legal",
+    description: "Contracts, compliance, and commercial legal support.",
+    icon: "Scale",
+    color: "#64748B",
+    sortOrder: 6,
+  },
+  {
+    slug: "customer-success",
+    name: "Customer Success",
+    description: "Onboarding, retention, expansion, and customer outcomes.",
+    icon: "HeartHandshake",
+    color: "#06B6D4",
+    sortOrder: 7,
+  },
+];

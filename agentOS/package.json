@@ -1,0 +1,24 @@
+{
+  "name": "agentos",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "postinstall": "npm run build -w @agentos/shared",
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w @agentos/api\" \"npm run dev -w @agentos/web\"",
+    "db:deploy": "npm run db:deploy -w @agentos/api",
+    "db:seed": "npm run db:seed -w @agentos/api",
+    "build": "npm run build -w @agentos/shared && npm run build -w @agentos/api && npm run build -w @agentos/web",
+    "lint": "npm run lint -w @agentos/api && npm run lint -w @agentos/web",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.4.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
