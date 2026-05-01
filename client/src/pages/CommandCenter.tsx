@@ -140,6 +140,9 @@ export function CommandCenter() {
           <Button onClick={() => void onExecuteDepartmentTask()} disabled={running || taskLength === 0}>
             {running ? "Running..." : "Run Task"}
           </Button>
+          <Button type="button" variant="ghost" onClick={() => navigate("/departments")}>
+            Department rooms
+          </Button>
           <Button type="button" variant="ghost" onClick={() => navigate("/history")}>
             View History
           </Button>

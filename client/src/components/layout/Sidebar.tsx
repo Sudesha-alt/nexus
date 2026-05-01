@@ -5,6 +5,7 @@ import { NavLinkItem } from "./NavLink";
 
 const links = [
   { to: "/", label: "Command" },
+  { to: "/departments", label: "Departments" },
   { to: "/history", label: "History" },
   { to: "/knowledge", label: "Knowledge" },
   { to: "/integrations", label: "Integrations" },

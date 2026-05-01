@@ -6,6 +6,8 @@ import { History } from "./pages/History";
 import { Integrations } from "./pages/Integrations";
 import { KnowledgeBase } from "./pages/KnowledgeBase";
 import { Settings } from "./pages/Settings";
+import { DepartmentRoom } from "./pages/DepartmentRoom";
+import { DepartmentsFloor } from "./pages/DepartmentsFloor";
 import { WorkflowDetail } from "./pages/WorkflowDetail";
 
 export default function App() {
@@ -24,6 +26,8 @@ export default function App() {
         >
           <Routes location={location}>
             <Route path="/" element={<CommandCenter />} />
+            <Route path="/departments" element={<DepartmentsFloor />} />
+            <Route path="/departments/:departmentId" element={<DepartmentRoom />} />
             <Route path="/workflow/:id" element={<WorkflowDetail />} />
             <Route path="/history" element={<History />} />
             <Route path="/knowledge" element={<KnowledgeBase />} />
