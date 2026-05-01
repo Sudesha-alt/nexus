@@ -70,3 +70,145 @@ export const ISO_DEPT_FILL: Record<AgentName, string> = {
   marketing: "rgba(219,39,119,0.18)",
   sales: "rgba(234,88,12,0.2)",
 };
+
+/** Bay silhouette on the floor map — each department reads as a distinct “room plate”. */
+export type RoomFootprintKind =
+  | "chamfer"
+  | "capsule"
+  | "hex"
+  | "octagon"
+  | "superround"
+  | "trapezoid";
+
+/** One shared bay shape so the floor reads as one system; color distinguishes departments. */
+export const ROOM_FOOTPRINT: Record<AgentName, RoomFootprintKind> = {
+  product: "chamfer",
+  design: "chamfer",
+  engineering: "chamfer",
+  qa: "chamfer",
+  marketing: "chamfer",
+  sales: "chamfer",
+};
+
+function clamp(n: number, lo: number, hi: number): number {
+  return Math.min(hi, Math.max(lo, n));
+}
+
+/** Closed path for a department bay; `(x,y,w,h)` is the SVG bounding box from the floor planner. */
+export function roomFootprintPath(
+  kind: RoomFootprintKind,
+  x: number,
+  y: number,
+  w: number,
+  h: number
+): string {
+  const cCh = clamp(Math.min(w, h) * 0.14, 6, 16);
+  const cOc = clamp(Math.min(w, h) * 0.2, 8, 22);
+  const rxRound = clamp(Math.min(w, h) * 0.24, 10, 28);
+
+  switch (kind) {
+    case "chamfer":
+      return [
+        `M ${x + cCh} ${y}`,
+        `L ${x + w - cCh} ${y}`,
+        `L ${x + w} ${y + cCh}`,
+        `L ${x + w} ${y + h - cCh}`,
+        `L ${x + w - cCh} ${y + h}`,
+        `L ${x + cCh} ${y + h}`,
+        `L ${x} ${y + h - cCh}`,
+        `L ${x} ${y + cCh}`,
+        "Z",
+      ].join(" ");
+
+    case "capsule": {
+      const r = Math.min(w, h) / 2 - 0.5;
+      const rr = clamp(r * 0.92, 4, Math.min(w, h) / 2 - 1);
+      return [
+        `M ${x + rr} ${y}`,
+        `L ${x + w - rr} ${y}`,
+        `A ${rr} ${rr} 0 0 1 ${x + w} ${y + rr}`,
+        `L ${x + w} ${y + h - rr}`,
+        `A ${rr} ${rr} 0 0 1 ${x + w - rr} ${y + h}`,
+        `L ${x + rr} ${y + h}`,
+        `A ${rr} ${rr} 0 0 1 ${x} ${y + h - rr}`,
+        `L ${x} ${y + rr}`,
+        `A ${rr} ${rr} 0 0 1 ${x + rr} ${y}`,
+        "Z",
+      ].join(" ");
+    }
+
+    case "hex": {
+      const insetX = w * 0.11;
+      const midY = y + h / 2;
+      return [
+        `M ${x + insetX} ${y}`,
+        `L ${x + w - insetX} ${y}`,
+        `L ${x + w} ${midY}`,
+        `L ${x + w - insetX} ${y + h}`,
+        `L ${x + insetX} ${y + h}`,
+        `L ${x} ${midY}`,
+        "Z",
+      ].join(" ");
+    }
+
+    case "octagon":
+      return [
+        `M ${x + cOc} ${y}`,
+        `L ${x + w - cOc} ${y}`,
+        `L ${x + w} ${y + cOc}`,
+        `L ${x + w} ${y + h - cOc}`,
+        `L ${x + w - cOc} ${y + h}`,
+        `L ${x + cOc} ${y + h}`,
+        `L ${x} ${y + h - cOc}`,
+        `L ${x} ${y + cOc}`,
+        "Z",
+      ].join(" ");
+
+    case "superround": {
+      const rx = clamp(rxRound, 6, Math.min(w, h) / 2 - 1);
+      return [
+        `M ${x + rx} ${y}`,
+        `L ${x + w - rx} ${y}`,
+        `A ${rx} ${rx} 0 0 1 ${x + w} ${y + rx}`,
+        `L ${x + w} ${y + h - rx}`,
+        `A ${rx} ${rx} 0 0 1 ${x + w - rx} ${y + h}`,
+        `L ${x + rx} ${y + h}`,
+        `A ${rx} ${rx} 0 0 1 ${x} ${y + h - rx}`,
+        `L ${x} ${y + rx}`,
+        `A ${rx} ${rx} 0 0 1 ${x + rx} ${y}`,
+        "Z",
+      ].join(" ");
+    }
+
+    case "trapezoid": {
+      const skew = w * 0.07;
+      return [
+        `M ${x + skew} ${y}`,
+        `L ${x + w - skew * 0.4} ${y}`,
+        `L ${x + w} ${y + h}`,
+        `L ${x} ${y + h}`,
+        "Z",
+      ].join(" ");
+    }
+
+    default:
+      return `M ${x} ${y} L ${x + w} ${y} L ${x + w} ${y + h} L ${x} ${y + h} Z`;
+  }
+}
+
+/** Corridor band — tapered ribbon instead of a plain rectangle. */
+export function corridorRibbonPath(x: number, y: number, w: number, h: number): string {
+  const dent = clamp(h * 0.32, 6, 16);
+  const flare = clamp(w * 0.018, 4, 14);
+  return [
+    `M ${x + flare} ${y}`,
+    `L ${x + w - flare} ${y}`,
+    `L ${x + w} ${y + dent}`,
+    `L ${x + w} ${y + h - dent}`,
+    `L ${x + w - flare} ${y + h}`,
+    `L ${x + flare} ${y + h}`,
+    `L ${x} ${y + h - dent}`,
+    `L ${x} ${y + dent}`,
+    "Z",
+  ].join(" ");
+}

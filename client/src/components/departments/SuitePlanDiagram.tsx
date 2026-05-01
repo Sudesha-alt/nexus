@@ -1,16 +1,20 @@
 import type { AgentName } from "@nexus/shared";
 import { useId } from "react";
 import { AGENT_META } from "../../lib/agents";
-import { ISO_DEPT_FILL } from "../../data/isometricFloor";
-import { OFFICE_SUITE } from "../../data/officeTheme";
-
-/** Suite key plan — matches isometric workspace (ink + flat fills) */
+import { ISO_DEPT_FILL, roomFootprintPath } from "../../data/isometricFloor";
+/** Suite key plan — zone geometry matches floor language (chamfers, L-zone, rounded core). */
 export function SuitePlanDiagram({ dept }: { dept: AgentName }) {
   const id = useId().replace(/:/g, "");
   const hatchId = `suite-hatch-${id}`;
   const meta = AGENT_META[dept];
-  const suite = OFFICE_SUITE[dept].suite.replace("Suite ", "");
   const zoneA = ISO_DEPT_FILL[dept];
+
+  const outer = roomFootprintPath("chamfer", 16, 16, 408, 268);
+  const spine = roomFootprintPath("trapezoid", 18, 18, 404, 42);
+  /** L-shaped output bay with open corner toward the spine. */
+  const zoneAPath =
+    "M 20 60 L 290 60 L 290 186 L 234 186 L 234 278 L 20 278 Z";
+  const zoneBPath = roomFootprintPath("superround", 292, 62, 126, 216);
 
   return (
     <div className="iso-card overflow-hidden">
@@ -26,16 +30,14 @@ export function SuitePlanDiagram({ dept }: { dept: AgentName }) {
           </pattern>
         </defs>
 
-        <rect x={20} y={20} width={400} height={260} fill="#fafafa" stroke="#0f172a" strokeWidth={2} rx={2} />
+        <path d={outer} fill="#fafafa" stroke="#0f172a" strokeWidth={2} strokeLinejoin="round" />
 
-        <rect
-          x={20}
-          y={20}
-          width={400}
-          height={40}
+        <path
+          d={spine}
           fill={`url(#${hatchId})`}
           stroke="#0f172a"
           strokeWidth={1.5}
+          strokeLinejoin="round"
         />
         <text
           x={280}
@@ -52,7 +54,22 @@ export function SuitePlanDiagram({ dept }: { dept: AgentName }) {
           WORKFLOW SPINE
         </text>
 
-        <rect x={20} y={60} width={270} height={220} fill={zoneA} fillOpacity={0.85} stroke="#0f172a" strokeWidth={1.5} />
+        <path
+          d={zoneAPath}
+          fill={zoneA}
+          fillOpacity={0.85}
+          stroke="#0f172a"
+          strokeWidth={1.5}
+          strokeLinejoin="round"
+        />
+        <path
+          d={roomFootprintPath("hex", 48, 118, 52, 44)}
+          fill="rgba(255,255,255,0.35)"
+          stroke="#0f172a"
+          strokeWidth={1}
+          strokeLinejoin="round"
+          opacity={0.9}
+        />
         <text
           x={36}
           y={88}
@@ -79,7 +96,16 @@ export function SuitePlanDiagram({ dept }: { dept: AgentName }) {
           ARTIFACTS / REVIEW
         </text>
 
-        <rect x={290} y={60} width={130} height={220} fill="#e2e8f0" fillOpacity={0.9} stroke="#0f172a" strokeWidth={1.5} />
+        <path
+          d={zoneBPath}
+          fill="#e2e8f0"
+          fillOpacity={0.92}
+          stroke="#0f172a"
+          strokeWidth={1.5}
+          strokeLinejoin="round"
+        />
+        <ellipse cx={355} cy={118} rx={14} ry={22} fill="rgba(255,255,255,0.5)" stroke="#0f172a" strokeWidth={1} />
+        <ellipse cx={355} cy={210} rx={14} ry={26} fill="rgba(255,255,255,0.45)" stroke="#0f172a" strokeWidth={1} />
         <text
           x={304}
           y={88}
@@ -109,7 +135,14 @@ export function SuitePlanDiagram({ dept }: { dept: AgentName }) {
           Integrations
         </text>
 
-        <line x1={20} y1={258} x2={420} y2={258} stroke="#64748b" strokeWidth={1} strokeDasharray="5 4" opacity={0.6} />
+        <path
+          d="M 20 258 L 420 258"
+          stroke="#64748b"
+          strokeWidth={1}
+          strokeDasharray="5 4"
+          opacity={0.6}
+          strokeLinecap="round"
+        />
         <text
           x={220}
           y={282}
@@ -122,7 +155,7 @@ export function SuitePlanDiagram({ dept }: { dept: AgentName }) {
             fontWeight: 600,
           }}
         >
-          SUITE {suite} · {meta.dept.toUpperCase()}
+          SUITE PLAN · {meta.dept.toUpperCase()}
         </text>
       </svg>
     </div>

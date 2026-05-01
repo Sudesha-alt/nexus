@@ -19,7 +19,6 @@ import {
   MOCK_ARTIFACTS_BY_DEPT,
 } from "../data/departmentRoomMock";
 import { ISO_DEPT_COLOR, ISO_DEPT_FILL } from "../data/isometricFloor";
-import { OFFICE_SUITE } from "../data/officeTheme";
 import { AGENT_META } from "../lib/agents";
 import "../styles/isometric-floor.css";
 
@@ -66,7 +65,6 @@ export function DepartmentRoom() {
 
   const meta = dept ? AGENT_META[dept] : null;
   const Icon = meta?.icon;
-  const suite = dept ? OFFICE_SUITE[dept] : null;
   const detailArtifact = useMemo(
     () => artifacts.find((a) => a.id === detailId) ?? null,
     [artifacts, detailId]
@@ -101,7 +99,7 @@ export function DepartmentRoom() {
     if (!dept) navigate("/departments", { replace: true });
   }, [dept, navigate]);
 
-  if (!dept || !meta || !Icon || !suite) {
+  if (!dept || !meta || !Icon) {
     return null;
   }
 
@@ -169,7 +167,7 @@ export function DepartmentRoom() {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 32 }}
     >
-      <IsoWorkspaceNav active="none" suiteHint={`${suite.suite} · ${meta.dept}`} />
+      <IsoWorkspaceNav active="none" suiteHint={meta.dept} />
 
       <nav aria-label="Breadcrumb" className="iso-breadcrumb mb-4">
         <ol className="flex flex-wrap items-center gap-1.5">
@@ -216,7 +214,7 @@ export function DepartmentRoom() {
           </div>
           <div>
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
-              {suite.suite} · zoomed suite
+              Department suite · zoomed
             </p>
             <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">
               {meta.dept}
