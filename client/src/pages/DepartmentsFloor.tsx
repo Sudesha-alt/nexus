@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { IsoWorkspaceNav } from "../components/departments/IsoWorkspaceNav";
 import { TopDownFloorPlan } from "../components/departments/TopDownFloorPlan";
 import { AGENT_META, AGENT_ORDER } from "../lib/agents";
-import { ISO_DEPT_FILL } from "../data/isometricFloor";
+import { ISO_DEPT_FILL, ROOM_FOOTPRINT, roomFootprintPath } from "../data/isometricFloor";
 import { mergeDeptTasks, useDepartmentTaskStore } from "../stores/departmentTaskStore";
 import "../styles/isometric-floor.css";
 
@@ -41,7 +41,17 @@ export function DepartmentsFloor() {
           <h3>Department key</h3>
           {AGENT_ORDER.map((agent) => (
             <div key={agent} className="iso-legend-row">
-              <span className="iso-swatch" style={{ background: ISO_DEPT_FILL[agent] }} />
+              <span className="iso-footprint-mini" title={AGENT_META[agent].dept}>
+                <svg viewBox="0 0 32 22" width="40" height="26" aria-hidden>
+                  <path
+                    d={roomFootprintPath(ROOM_FOOTPRINT[agent], 1.5, 1.5, 29, 19)}
+                    fill={ISO_DEPT_FILL[agent]}
+                    stroke="#0f172a"
+                    strokeWidth={1.2}
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-800">
                 {AGENT_META[agent].dept}
               </span>

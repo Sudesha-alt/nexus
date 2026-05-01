@@ -2,15 +2,17 @@ import type { AgentName } from "@nexus/shared";
 import { motion } from "framer-motion";
 import { AGENT_META } from "../../lib/agents";
 import {
+  corridorRibbonPath,
   ISO_CORRIDOR,
   ISO_DEPT_FILL,
   ISO_ROOM_PLAN,
   planCenter,
   planRectToTopDownSvg,
+  ROOM_FOOTPRINT,
+  roomFootprintPath,
   TOPDOWN_VIEW_H,
   TOPDOWN_VIEW_W,
 } from "../../data/isometricFloor";
-import { OFFICE_SUITE } from "../../data/officeTheme";
 import type { DeptTask } from "../../stores/departmentTaskStore";
 import { openTaskCountFor } from "../../stores/departmentTaskStore";
 
@@ -42,7 +44,7 @@ function RoomCell({
   const cx = r.x + r.width / 2;
   const cy = r.y + r.height / 2;
   const meta = AGENT_META[agent];
-  const suite = OFFICE_SUITE[agent].suite.replace("Suite ", "");
+  const outline = roomFootprintPath(ROOM_FOOTPRINT[agent], r.x, r.y, r.width, r.height);
 
   return (
     <motion.g
@@ -50,54 +52,35 @@ function RoomCell({
       animate={{ opacity: 1 }}
       transition={{ delay: 0.04 * i, duration: 0.25 }}
     >
-      <rect
-        x={r.x}
-        y={r.y}
-        width={r.width}
-        height={r.height}
-        rx={3}
-        fill={ISO_DEPT_FILL[agent]}
-        stroke="#0f172a"
-        strokeWidth={2}
-      />
-      <rect
-        x={r.x + 4}
-        y={r.y + 4}
-        width={r.width - 8}
-        height={r.height - 8}
-        rx={2}
-        fill="none"
-        stroke="#ffffff"
-        strokeOpacity={0.45}
-        strokeWidth={1}
-      />
+      <path d={outline} fill={ISO_DEPT_FILL[agent]} stroke="#0f172a" strokeWidth={2} strokeLinejoin="round" />
+      {(() => {
+        const tcx = r.x + r.width / 2;
+        const tcy = r.y + r.height / 2;
+        return (
+          <path
+            d={outline}
+            fill="none"
+            stroke="#ffffff"
+            strokeOpacity={0.45}
+            strokeWidth={1}
+            strokeLinejoin="round"
+            transform={`translate(${tcx} ${tcy}) scale(0.96) translate(${-tcx} ${-tcy})`}
+          />
+        );
+      })()}
       <text
         x={cx}
-        y={r.y + 22}
+        y={cy - 18}
         textAnchor="middle"
         style={{
           fontFamily: "ui-monospace, monospace",
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 800,
           fill: "#0f172a",
-          letterSpacing: "0.06em",
+          letterSpacing: "0.04em",
         }}
       >
-        {suite}
-      </text>
-      <text
-        x={cx}
-        y={r.y + 38}
-        textAnchor="middle"
-        style={{
-          fontFamily: "ui-monospace, monospace",
-          fontSize: 8,
-          fontWeight: 700,
-          letterSpacing: "0.18em",
-          fill: "#475569",
-        }}
-      >
-        {meta.dept.toUpperCase()}
+        {meta.dept}
       </text>
       <TopDeskHint cx={cx} cy={cy + 12} />
       {openTasks > 0 ? (
@@ -125,12 +108,8 @@ function RoomCell({
           </text>
         </g>
       ) : null}
-      <rect
-        x={r.x}
-        y={r.y}
-        width={r.width}
-        height={r.height}
-        rx={3}
+      <path
+        d={outline}
         fill="transparent"
         className="cursor-pointer outline-none hover:fill-white/25 focus:fill-sky-200/30"
         role="button"
@@ -161,8 +140,12 @@ export function TopDownFloorPlan({
   const hx = hub.x;
   const hy = hub.y;
 
+  const hubGradId = "hub-floor-grad";
+  const hubRugId = "hub-rug-pattern";
+  const hubWoodId = "hub-wood-fine";
+
   return (
-    <div className="iso-floor-stage w-full overflow-hidden rounded-xl border-2 border-[#0f172a] bg-slate-100 shadow-[6px_8px_0_rgba(15,23,42,0.16)]">
+    <div className="iso-floor-stage w-full overflow-hidden">
       <svg
         viewBox={`0 0 ${TOPDOWN_VIEW_W} ${TOPDOWN_VIEW_H}`}
         className="block h-auto w-full max-h-[min(70vh,520px)]"
@@ -174,19 +157,22 @@ export function TopDownFloorPlan({
           <pattern id="td-grid" width={20} height={20} patternUnits="userSpaceOnUse">
             <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#cbd5e1" strokeWidth={0.6} />
           </pattern>
+          <radialGradient id={hubGradId} cx="45%" cy="40%" r="75%">
+            <stop offset="0%" stopColor="#e8d5c4" />
+            <stop offset="55%" stopColor="#cfa882" />
+            <stop offset="100%" stopColor="#a67c52" />
+          </radialGradient>
+          <pattern id={hubRugId} width={8} height={8} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width={8} height={8} fill="rgba(120,53,15,0.12)" />
+            <path d="M0 4 H8 M4 0 V8" stroke="rgba(69,26,3,0.15)" strokeWidth={0.6} />
+          </pattern>
+          <pattern id={hubWoodId} width={6} height={100} patternUnits="userSpaceOnUse">
+            <path d="M0 0 V100" stroke="rgba(41,24,12,0.14)" strokeWidth={0.8} />
+            <path d="M3 0 V100" stroke="rgba(255,255,255,0.06)" strokeWidth={0.5} />
+          </pattern>
         </defs>
         <rect x={0} y={0} width={TOPDOWN_VIEW_W} height={TOPDOWN_VIEW_H} fill="#f1f5f9" />
         <rect x={slab.x} y={slab.y} width={slab.width} height={slab.height} fill="url(#td-grid)" opacity={0.5} />
-        <rect
-          x={slab.x}
-          y={slab.y}
-          width={slab.width}
-          height={slab.height}
-          fill="none"
-          stroke="#0f172a"
-          strokeWidth={2.5}
-          rx={4}
-        />
 
         {ROW_TOP.map((agent, i) => (
           <RoomCell
@@ -198,30 +184,64 @@ export function TopDownFloorPlan({
           />
         ))}
 
-        <rect
-          x={corr.x}
-          y={corr.y}
-          width={corr.width}
-          height={corr.height}
+        <path
+          d={corridorRibbonPath(corr.x, corr.y, corr.width, corr.height)}
           fill="#94a3b8"
           fillOpacity={0.55}
           stroke="#0f172a"
           strokeWidth={2}
-          strokeDasharray="8 6"
-          rx={2}
+          strokeDasharray="7 5"
+          strokeLinejoin="round"
         />
-        <ellipse cx={hx} cy={hy} rx={46} ry={22} fill="#e2e8f0" stroke="#0f172a" strokeWidth={1.5} />
-        <rect x={hx - 38} y={hy - 10} width={76} height={20} rx={4} fill="#b45309" stroke="#0f172a" strokeWidth={1.2} />
+        <g pointerEvents="none" aria-hidden>
+          <path
+            d={roomFootprintPath("superround", hx - 54, hy - 32, 108, 64)}
+            fill={`url(#${hubGradId})`}
+            stroke="#3f2e22"
+            strokeWidth={2}
+            strokeLinejoin="round"
+            opacity={0.98}
+          />
+          <ellipse
+            cx={hx}
+            cy={hy + 2}
+            rx={44}
+            ry={26}
+            fill={`url(#${hubRugId})`}
+            stroke="#78350f"
+            strokeWidth={1.2}
+            strokeOpacity={0.45}
+          />
+          <ellipse cx={hx} cy={hy} rx={36} ry={18} fill={`url(#${hubWoodId})`} opacity={0.35} />
+          <ellipse cx={hx} cy={hy - 2} rx={28} ry={12} fill="#5c3d2e" stroke="#29180c" strokeWidth={1.4} />
+          <ellipse cx={hx - 18} cy={hy + 2} rx={5} ry={7} fill="#422006" stroke="#0f172a" strokeWidth={0.9} />
+          <ellipse cx={hx + 18} cy={hy + 2} rx={5} ry={7} fill="#422006" stroke="#0f172a" strokeWidth={0.9} />
+          <ellipse cx={hx} cy={hy - 14} rx={5} ry={7} fill="#422006" stroke="#0f172a" strokeWidth={0.9} />
+          <ellipse cx={hx} cy={hy + 14} rx={5} ry={7} fill="#422006" stroke="#0f172a" strokeWidth={0.9} />
+          <rect x={hx - 42} y={hy + 22} width={22} height={10} rx={2} fill="#78716c" stroke="#0f172a" strokeWidth={1} />
+          <rect x={hx + 20} y={hy + 22} width={22} height={10} rx={2} fill="#78716c" stroke="#0f172a" strokeWidth={1} />
+          <rect x={hx - 8} y={hy - 38} width={16} height={12} rx={2} fill="#365314" stroke="#0f172a" strokeWidth={0.9} />
+          <circle cx={hx} cy={hy - 42} r={5} fill="#4d7c0f" stroke="#0f172a" strokeWidth={0.85} />
+          <path
+            d={`M ${hx - 6} ${hy - 48} Q ${hx} ${hy - 54} ${hx + 6} ${hy - 48}`}
+            fill="none"
+            stroke="#166534"
+            strokeWidth={1.2}
+            strokeLinecap="round"
+          />
+          <circle cx={hx - 50} cy={hy - 18} r={3.5} fill="#fbbf24" stroke="#0f172a" strokeWidth={0.7} opacity={0.85} />
+          <line x1={hx - 50} y1={hy - 18} x2={hx - 50} y2={hy - 28} stroke="#44403c" strokeWidth={1.2} strokeLinecap="round" />
+        </g>
         <text
           x={hx}
-          y={hy + 34}
+          y={hy + 48}
           textAnchor="middle"
           style={{
             fontFamily: "ui-monospace, monospace",
             fontSize: 9,
             fontWeight: 700,
             letterSpacing: "0.22em",
-            fill: "#1e293b",
+            fill: "#292524",
           }}
         >
           HUB

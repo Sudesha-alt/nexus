@@ -1,11 +1,11 @@
 import type { AgentName } from "@nexus/shared";
 import {
-  Brush,
-  Code2,
-  Megaphone,
-  Rocket,
-  ShieldCheck,
-  Target,
+  ClipboardList,
+  CircuitBoard,
+  Handshake,
+  ListChecks,
+  PenTool,
+  Sparkles,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -22,10 +22,10 @@ export const AGENT_META: Record<
   AgentName,
   { label: string; dept: string; icon: LucideIcon }
 > = {
-  product: { label: "PRD Agent", dept: "Product", icon: Target },
-  design: { label: "Design Agent", dept: "Design", icon: Brush },
-  engineering: { label: "Engineering Agent", dept: "Engineering", icon: Code2 },
-  qa: { label: "QA Agent", dept: "QA", icon: ShieldCheck },
-  marketing: { label: "Marketing Agent", dept: "Marketing", icon: Megaphone },
-  sales: { label: "Sales Agent", dept: "Sales", icon: Rocket },
+  product: { label: "PRD Agent", dept: "Product", icon: ClipboardList },
+  design: { label: "Design Agent", dept: "Design", icon: PenTool },
+  engineering: { label: "Engineering Agent", dept: "Engineering", icon: CircuitBoard },
+  qa: { label: "QA Agent", dept: "QA", icon: ListChecks },
+  marketing: { label: "Marketing Agent", dept: "Marketing", icon: Sparkles },
+  sales: { label: "Sales Agent", dept: "Sales", icon: Handshake },
 };
