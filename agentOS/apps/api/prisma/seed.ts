@@ -169,6 +169,16 @@ async function main() {
     where: { slug: "engineering" },
   });
 
+  const skArchitect = await prisma.skill.findUnique({
+    where: { slug: skillSlug("engineering", "System Architect") },
+  });
+  const skFrontend = await prisma.skill.findUnique({
+    where: { slug: skillSlug("engineering", "Frontend Engineer") },
+  });
+  const skBackend = await prisma.skill.findUnique({
+    where: { slug: skillSlug("engineering", "Backend Engineer") },
+  });
+
   let atlas = await prisma.agent.findFirst({
     where: { name: "Atlas", departmentId: eng.id },
   });
@@ -177,12 +187,23 @@ async function main() {
       data: {
         name: "Atlas",
         role: "System Architect",
-        description: "System design and scalability.",
+        description: skArchitect?.description ?? "System design and scalability.",
         systemPrompt:
+          skArchitect?.systemPrompt ??
           "You are Atlas, a system architect. Focus on tradeoffs, scalability, and risk.",
         departmentId: eng.id,
         createdById: user.id,
+        skillId: skArchitect?.id ?? null,
         nextAgentId: null,
+      },
+    });
+  } else {
+    await prisma.agent.update({
+      where: { id: atlas.id },
+      data: {
+        description: skArchitect?.description ?? atlas.description,
+        systemPrompt: skArchitect?.systemPrompt ?? atlas.systemPrompt,
+        skillId: skArchitect?.id ?? atlas.skillId,
       },
     });
   }
@@ -195,18 +216,25 @@ async function main() {
       data: {
         name: "Pixel",
         role: "Frontend Engineer",
-        description: "React, Next.js, and design systems.",
+        description: skFrontend?.description ?? "React, Next.js, and design systems.",
         systemPrompt:
+          skFrontend?.systemPrompt ??
           "You are Pixel, a frontend engineer. Focus on UX, components, and performance.",
         departmentId: eng.id,
         createdById: user.id,
+        skillId: skFrontend?.id ?? null,
         nextAgentId: atlas.id,
       },
     });
   } else {
     await prisma.agent.update({
       where: { id: pixel.id },
-      data: { nextAgentId: atlas.id },
+      data: {
+        nextAgentId: atlas.id,
+        description: skFrontend?.description ?? pixel.description,
+        systemPrompt: skFrontend?.systemPrompt ?? pixel.systemPrompt,
+        skillId: skFrontend?.id ?? pixel.skillId,
+      },
     });
   }
 
@@ -218,18 +246,74 @@ async function main() {
       data: {
         name: "Nova",
         role: "Backend Engineer",
-        description: "API design and Node.js microservices.",
+        description: skBackend?.description ?? "API design and Node.js microservices.",
         systemPrompt:
+          skBackend?.systemPrompt ??
           "You are Nova, a senior backend engineer. Focus on APIs, data modeling, and operational excellence.",
         departmentId: eng.id,
         createdById: user.id,
+        skillId: skBackend?.id ?? null,
         nextAgentId: pixel.id,
       },
     });
   } else {
     await prisma.agent.update({
       where: { id: nova.id },
-      data: { nextAgentId: pixel.id },
+      data: {
+        nextAgentId: pixel.id,
+        description: skBackend?.description ?? nova.description,
+        systemPrompt: skBackend?.systemPrompt ?? nova.systemPrompt,
+        skillId: skBackend?.id ?? nova.skillId,
+      },
+    });
+  }
+
+  /** One default agent per skill (library system prompt), unless already represented by skillId (e.g. Nova/Pixel/Atlas). */
+  const allSkills = await prisma.skill.findMany({
+    include: { category: true },
+    orderBy: [{ categoryId: "asc" }, { sortOrder: "asc" }],
+  });
+
+  for (const skill of allSkills) {
+    let departmentId = skill.category.departmentId;
+    if (!departmentId) {
+      const d = await prisma.department.findUnique({
+        where: { slug: skill.category.slug },
+      });
+      departmentId = d?.id ?? null;
+    }
+    if (!departmentId) {
+      console.warn("Skill has no department:", skill.slug);
+      continue;
+    }
+
+    const existing = await prisma.agent.findFirst({
+      where: { skillId: skill.id },
+    });
+
+    if (existing) {
+      await prisma.agent.update({
+        where: { id: existing.id },
+        data: {
+          role: skill.title,
+          description: skill.description,
+          systemPrompt: skill.systemPrompt,
+        },
+      });
+      continue;
+    }
+
+    await prisma.agent.create({
+      data: {
+        name: skill.title,
+        role: skill.title,
+        description: skill.description,
+        systemPrompt: skill.systemPrompt,
+        departmentId,
+        skillId: skill.id,
+        createdById: user.id,
+        nextAgentId: null,
+      },
     });
   }
 

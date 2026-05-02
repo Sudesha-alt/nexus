@@ -8,6 +8,7 @@
   "scripts": {
     "postinstall": "npm run build -w @agentos/shared",
     "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w @agentos/api\" \"npm run dev -w @agentos/web\"",
+    "docker:up": "docker compose up -d",
     "db:deploy": "npm run db:deploy -w @agentos/api",
     "db:seed": "npm run db:seed -w @agentos/api",
     "build": "npm run build -w @agentos/shared && npm run build -w @agentos/api && npm run build -w @agentos/web",

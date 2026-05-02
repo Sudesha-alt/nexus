@@ -68,6 +68,37 @@ npm run dev
 
 **Demo login (after seed):** `demo@agentos.ai` / `Demo@1234`
 
+## Troubleshooting
+
+### `ECONNREFUSED` on port **6379** (Redis)
+
+The API uses **Redis** for BullMQ job queues. If nothing is listening on `127.0.0.1:6379`, start it from the **agentOS** directory:
+
+```bash
+npm run docker:up
+```
+
+or only Redis:
+
+```bash
+docker compose up -d redis
+```
+
+Confirm Docker is running, then restart `npm run dev`. Your `REDIS_URL` should match (default `redis://127.0.0.1:6379` in `.env.example`).
+
+### Windows: `dockerDesktopLinuxEngine` / “cannot find the file specified”
+
+Docker **is not running** or **Docker Desktop is not installed**. The CLI is trying to talk to the engine at `npipe:////./pipe/dockerDesktopLinuxEngine` and nothing is listening.
+
+1. Install [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/) if you have not already (WSL 2 backend is recommended).
+2. **Start Docker Desktop** from the Start menu and wait until the whale icon shows **“Docker Desktop is running”** (engine green).
+3. In PowerShell, run `docker version` — both Client and Server should print; if Server errors, the daemon is still down.
+4. Retry: `docker compose up -d` from the `agentOS` folder.
+
+**Symlink warning** (`loaded without an explicit name from a symlink`) is harmless; you can ignore it or `cd` into the real folder path. To silence it, add to `docker-compose.yml` under the top level: `name: agentos` (Compose [project name](https://docs.docker.com/compose/how-tos/project-name/)).
+
+**If you cannot use Docker:** run **PostgreSQL** (with pgvector or a compatible URL for dev) and **Redis** yourself — e.g. install Redis via WSL2, or use a managed Redis/Postgres URL in `apps/api/.env` — then keep `DATABASE_URL` / `REDIS_URL` pointing at those services.
+
 ## API summary
 
 | Method | Path | Notes |

@@ -1,3 +1,5 @@
+name: agentos
+
 services:
   postgres:
     image: pgvector/pgvector:pg16

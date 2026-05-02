@@ -3,6 +3,7 @@
 import {
   Building2,
   ClipboardList,
+  FileText,
   LayoutDashboard,
   Library,
   Menu,
@@ -19,6 +20,7 @@ const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/departments", label: "Departments", icon: Building2 },
   { href: "/skills", label: "Skill Library", icon: Library },
+  { href: "/agents/prompts", label: "System prompts", icon: FileText },
   { href: "/agents/new", label: "New Agent", icon: Users },
   { href: "/tasks", label: "Tasks", icon: ClipboardList },
 ];

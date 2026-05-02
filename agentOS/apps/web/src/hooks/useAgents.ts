@@ -3,6 +3,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
+export type AgentListRow = {
+  id: string;
+  name: string;
+  role: string;
+  description: string;
+  systemPrompt: string;
+  departmentId: string;
+  nextAgentId: string | null;
+  department: { name: string; slug: string };
+  nextAgent: { id: string; name: string } | null;
+  skill?: { id: string; title: string; slug: string } | null;
+};
+
 export function useAgents(departmentId?: string) {
   return useQuery({
     queryKey: ["agents", departmentId],
@@ -10,16 +23,7 @@ export function useAgents(departmentId?: string) {
       const { data } = await api.get("/api/agents", {
         params: departmentId ? { departmentId } : undefined,
       });
-      return data as {
-        id: string;
-        name: string;
-        role: string;
-        description: string;
-        departmentId: string;
-        nextAgentId: string | null;
-        department: { name: string; slug: string };
-        nextAgent: { id: string; name: string } | null;
-      }[];
+      return data as AgentListRow[];
     },
   });
 }
